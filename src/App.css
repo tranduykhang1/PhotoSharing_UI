@@ -1,0 +1,12 @@
+body{
+	background-image: linear-gradient(pink, #FFBDFB);
+}
+#root{
+	height: auto;
+}
+.form-group{
+	padding: 0 !important
+}
+input, label{
+	margin: 0 !important;
+}
