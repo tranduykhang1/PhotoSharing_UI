@@ -1,0 +1,14 @@
+body {
+    background-color: white;
+}
+
+.linkActive {
+    color: white !important;
+    background-color: black !important;
+    padding: 19px 15px !important;
+    border-radius: 40px !important;
+}
+
+.MuiGrid-container {
+    flex-wrap: nowrap !important;
+}

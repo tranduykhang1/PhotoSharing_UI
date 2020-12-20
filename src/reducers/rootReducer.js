@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
-import product from "./product.js";
+import auth from "./Auth.js";
 
 const reducers = combineReducers({
-	product
+    auth
 });
 export default reducers;
