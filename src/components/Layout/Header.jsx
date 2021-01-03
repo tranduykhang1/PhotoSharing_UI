@@ -8,53 +8,92 @@ import {
   Avatar,
   Box,
   Button,
-  Drawer,
   Grid,
   InputBase,
+  List,
   Menu,
-  MenuItem,
-  TextField,
+  ListItem,
+  ListItemText,
   Typography,
   withStyles,
 } from "@material-ui/core";
 
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
 import SearchIcon from "@material-ui/icons/Search";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import ClearIcon from "@material-ui/icons/Clear";
+import isLogged from "../assets/config/isLogged.js";
 
 import style from "../assets/style/home/home.js";
 import { NavLink } from "react-router-dom";
+import { getCurrentUser } from "../../action/User";
+import { Skeleton } from "@material-ui/lab";
+import ProfileExpand from "./ProfileExpand";
+import { getSearchList, searchPhoto } from "../../action/Photo";
 
 const Header = (props) => {
   const { classes } = props;
   const [widthStatus, setWidth] = useState(false);
+  const [isExpand, setExpand] = useState(false);
+  const [searchText, setSearch] = useState("");
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [drawer, setDrawer] = useState({ chat: false, profile: false });
+  const dispatch = useDispatch();
 
-  useEffect(() => {
+  const user = useSelector((state) => state.user.currentUser);
+  const searchResult = useSelector((state) => state.photo.searchPhoto);
+  const listSearch = useSelector((state) => state.photo.listSearch);
+
+  useEffect(async () => {
+    dispatch(getCurrentUser());
+
     const handleResize = () => {
       if (window.innerWidth <= 1400) {
         setWidth(true);
+        setExpand(false);
       } else {
         setWidth(false);
       }
     };
-
     window.addEventListener("resize", handleResize);
-  });
+  }, []);
+  useEffect(() => {
+    setExpand(false);
+  }, [searchResult]);
+  useEffect(() => {
+    if (isLogged) {
+      dispatch(getSearchList());
+    }
+  }, [searchResult]);
 
-  const toggleChat = (isOpen) => (event) => {
-    setDrawer({ ...drawer, chat: isOpen, profile: isOpen });
-  };
-
+  //home buttom
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+  const toggleExpand = (status) => {
+    setTimeout(() => {
+      setExpand(status);
+    }, 100);
+  };
+  const handleChange = (e) => {
+    setSearch(e.target.value);
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(searchPhoto(searchText));
+  };
+  const quickSearch = (q) => {
+    setSearch(q);
+    dispatch(searchPhoto(q));
   };
 
   return (
@@ -104,7 +143,7 @@ const Header = (props) => {
               onClose={handleClose}
             >
               <Grid item>
-                <NavLink  activeClassName={classes.linkActive} to="/" exact>
+                <NavLink activeClassName={classes.linkActive} to="/" exact>
                   <Typography className={classes.menuLink}>
                     Trang chủ
                   </Typography>{" "}
@@ -122,56 +161,90 @@ const Header = (props) => {
 
       <Grid md={8} sm={12} className={classes.search}>
         <SearchIcon fontSize="medium" />
-        <InputBase
-          placeholder="Tìm kiếm"
-          type="text"
-          className={classes.searchInput}
-        />
-      </Grid>
-      <Grid
-        container
-        md={1}
-        sm={2}
-        alignItems="center"
-        justify="center"
-
-      >
-        <Box display="flex" >
-          <NavLink to="/login" activeClassName="linkActive" className={classes.btnLogin}>Đăng nhập</NavLink>
+        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+          <InputBase
+            fullWidth
+            placeholder="Tìm kiếm"
+            type="text"
+            value={searchText}
+            className={classes.searchInput}
+            onFocus={() => toggleExpand(true)}
+            onBlur={() => toggleExpand(false)}
+            onChange={handleChange}
+          />
+        </form>
+        <Box
+          display={isExpand ? "block" : "none"}
+          className={classes.searchExpand}
+        >
+          <Box display="flex" alignItems="center">
+            <Typography variant="h6" style={{ fontWeight: "bold" }}>
+              Tìm kiếm gần đây
+            </Typography>
+            <ClearIcon style={{ cursor: "pointer", color: "grey" }} />
+          </Box>
+          <List component="nav" className={classes.searchPrev}>
+            {listSearch
+              ? listSearch[0].history_search.map((result, index) => {
+                  return (
+                    <ListItem
+                      button
+                      className={classes.searchItems}
+                      key={index}
+                      onClick={() => quickSearch(result)}
+                    >
+                      <ListItemText primary={result} />
+                    </ListItem>
+                  );
+                })
+              : ""}
+          </List>
         </Box>
-        <Box display="none" alignItems="center" justify="center">
+      </Grid>
+      <Grid container md={1} sm={2} alignItems="center" justify="center">
+        <Box display={isLogged ? "none" : "flex"}>
+          <NavLink
+            to="/login"
+            activeClassName="linkActive"
+            className={classes.btnLogin}
+          >
+            Đăng nhập
+          </NavLink>
+        </Box>
+        <Box
+          display={isLogged ? "flex" : "none"}
+          alignItems="center"
+          justify="center"
+        >
           <Grid item className={classes.rightItem}>
             <SmsIcon
-              onClick={() => setDrawer({ ...drawer, chat: true })}
+              onClick={() => setDrawer({ ...drawer, chat: !drawer.chat })}
               className={classes.icon}
             />
-            <Drawer
-              anchor="right"
-              open={drawer.chat}
-              onClick={toggleChat(false)}
-            >
-              chat
-            </Drawer>
+            {drawer.chat ? "Chat" : null}
           </Grid>
           <Grid item className={classes.rightItem}>
-            <Avatar alt="Logo" src={logo} className={classes.avatar} />
+            <a href={!user ? "" : `/user/${user._id}`}>
+              <Avatar
+                alt="Logo"
+                src={user ? user.avatar : ""}
+                className={classes.avatar}
+              >
+                {user && user.last_name.split("")[0]}
+              </Avatar>
+            </a>
           </Grid>
           <Grid item className={classes.rightItem}>
             <ArrowDropDownIcon
-              onClick={() => setDrawer({ ...drawer, profile: true })}
+              onClick={() => setDrawer({ ...drawer, profile: !drawer.profile })}
               className={classes.icon}
             />
-            <Drawer
-              anchor="right"
-              open={drawer.profile}
-              onClick={toggleChat(false)}
-            >
-              profile
-            </Drawer>
+            {drawer.profile ? <ProfileExpand /> : null}
           </Grid>
         </Box>
       </Grid>
     </Grid>
   );
 };
+
 export default withStyles(style)(Header);

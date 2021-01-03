@@ -2,17 +2,19 @@ import img from "../../img/login-background.jpg"
 
 const style = theme => ({
     authContainer: {
-        height: '800px',
+        // height: '650px',
+        maxHeight: '800px',
         margin: '50px auto',
-        boxShadow: '1px 5px 6px 3px #a4a4a4'
+        boxShadow: '1px 1px 6px 2px #e3e3e3;'
     },
     loginForm: {
-        paddingTop: '150px',
-        boxShadow: '-2px 0 3px -1px #b6b6b6;'
+        padding: '50px 0',
+
     },
     registerForm: {
-        paddingTop: '80px',
-        boxShadow: '1px 5px 6px 3px #a4a4a4'
+        padding: '10px 0',
+
+        height: 'auto'
     },
     forgotPasswordForm: {
         marginTop: '40px',
@@ -40,7 +42,7 @@ const style = theme => ({
         justifyContent: 'center'
     },
     loginTitle: {
-        marginBottom: '50px',
+        marginBottom: '30px',
         textTransform: 'uppercase',
     },
     formControl: {

@@ -12,34 +12,56 @@ import style from "../assets/style/home/photo.js";
 import Masonry from "react-masonry-css";
 import React from "react";
 import FavoriteIcon from "@material-ui/icons/Favorite";
-import { Link } from "react-router-dom";
+import { NotificationManager } from "react-notifications";
+
 import { useState, useEffect } from "react";
-import Axios from "axios";
-import {useHistory, useRouteMatch} from 'react-router-dom'
+import { useDispatch, useSelector } from "react-redux";
+import { getAllPhoto, savePhoto } from "../../action/Photo";
+import { Skeleton } from "@material-ui/lab";
+import { getAlbum } from "../../action/Album.js";
+import { getCurrentUser } from "../../action/User.js";
+import icon from "../assets/img/love.png";
+import subString from "../assets/config/subString.js";
 
 const PostItems = (props) => {
-  const data = [
-    'https://source.unsplash.com/random',
-    'https://picsum.photos/200/300',
-    'https://source.unsplash.com/random',
-    'https://source.unsplash.com/random',
-    'https://source.unsplash.com/random',
-    'https://picsum.photos/200/300',
-    'https://source.unsplash.com/random',
-    'https://source.unsplash.com/random',
-    'https://picsum.photos/200/300',
-    'https://source.unsplash.com/random',
-    'https://picsum.photos/200/300',
-    'https://source.unsplash.com/random',
-    'https://source.unsplash.com/random',
-  ];
+  const loadingData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
+  const dispatch = useDispatch();
   const { classes } = props;
+  const [stateAlbum, setAlbum] = useState("");
 
-  const history = useHistory();
-  const {url} = useRouteMatch();
+  let data = useSelector((state) => state.photo.listPhotos);
+  const album = useSelector((state) => state.album.data);
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const saveRes = useSelector((state) => state.photo.saveRes);
+  const searchResult = useSelector((state) => state.photo.searchPhoto);
 
-  const image = "https://source.unsplash.com/random";
+  useEffect(() => {
+    dispatch(getAllPhoto());
+    dispatch(getAlbum());
+    dispatch(getCurrentUser());
+  }, []);
+  useEffect(() => {
+    dispatch(getAllPhoto());
+  }, [props.uploadSuccess]);
+  useEffect(() => {
+    if (searchResult) {
+      data = searchResult;
+    }
+  }, [searchResult]);
+
+  const handleChange = (e) => {
+    setAlbum(e.target.value);
+  };
+
+  const handleSave = async (data) => {
+    dispatch(savePhoto(stateAlbum, data));
+    return setAlbum("");
+  };
+
+  if (saveRes) {
+    NotificationManager.success("Đã Lưu");
+  }
 
   const breakpointColumnsObj = {
     default: 6,
@@ -48,50 +70,114 @@ const PostItems = (props) => {
     500: 1,
   };
 
+  let albums;
+  if (album) {
+    albums = album.data.map((alb, index) => {
+      return (
+        <option value={alb._id} key={index}>
+          {alb.name}
+        </option>
+      );
+    });
+  }
 
-  const posts = data.map((d, index) => {
-    return (
-      <Card
-        className={classes.cardItems}
-        key={index}
+  let photo;
+  if (!data) {
+    photo = loadingData.map((d, index) => {
+      return (
+        <Card className={classes.cardItems} key={index}>
+          <Skeleton
+            animation="pulse"
+            variant="rect"
+            width={200}
+            height={270}
+            style={{ borderRadius: "20px" }}
+          />
+        </Card>
+      );
+    });
+  } else {
+    if (searchResult) {
+      data = searchResult;
+    }
+    photo = data.map((d, index) => {
+      let fullName = subString(
+        d.users[0].first_name + d.users[0].last_name,
+        true
+      );
+      let title = subString(d.title, false);
+      return (
+        <Card className={classes.cardItems} key={index}>
+          {currentUser && currentUser._id === d.users[0]._id ? (
+            <Box display="flex" className={classes.albumOption}>
+              <Typography style={{ color: "white" }}>Bạn đã tải lên</Typography>
+            </Box>
+          ) : (
+            <Box display="flex" className={classes.albumOption}>
+              <NativeSelect
+                name="age"
+                className={classes.select}
+                onChange={handleChange}
+              >
+                <option disabled selected value="">
+                  --Albums--
+                </option>
+                {albums}
+              </NativeSelect>
+              <Button
+                className={classes.saveImg}
+                disabled={currentUser ? (stateAlbum ? false : true) : true}
+                onClick={() => handleSave(d)}
+              >
+                Lưu
+              </Button>
+            </Box>
+          )}
 
-      >
-        <Box display="flex" className={classes.albumOption}>
-          <NativeSelect name="age" className={classes.select}>
-            <option value="">None</option>
-            <option value={10}>Ten</option>
-            <option value={20}>Twenty</option>
-            <option value={30}>Thirty</option>
-          </NativeSelect>
-          <Button className={classes.saveImg}>Save</Button>
-        </Box>
-        <div >
-          <img src={d} title="Paella dish" className={classes.image} />
-        </div>
-        <Box display="flex" className={classes.bottomOption}>
-          <Button color="primary" className={classes.showUser}>
-            User name
-          </Button>
-          <Link style={{ display: "flex" }}>
-            <FavoriteIcon style={{ color: "white" }} />
-            <Typography style={{ color: "white" }}>1</Typography>
-          </Link>
-        </Box>
-        <Grid className={classes.photoTitle}>
-        <Typography variant="h6" className={classes.textTitle}>Title</Typography>
-        </Grid>
-      </Card>
-    );
-  });
+          <a href={`/photo/${d._id}`}>
+            <div>
+              <img src={d.url} alt={d.name} className={classes.image} />
+            </div>
+          </a>
+          <Box display="flex" className={classes.bottomOption}>
+            <Button color="primary" size="small" className={classes.showUser}>
+              {fullName}
+            </Button>
+            <div className={classes.countReaction}>
+              {/* <FavoriteIcon style={{ color: "white" }} /> */}
+              <img src={icon} id="icon" alt="Reaction" />
+              <Typography style={{ color: "white" }}>
+                {d.reaction.length}
+              </Typography>
+            </div>
+          </Box>
+          <Grid className={classes.photoTitle}>
+            <Typography variant="h6" className={classes.textTitle}>
+              {title}
+            </Typography>
+          </Grid>
+        </Card>
+      );
+    });
+  }
+
   return (
     <Grid container className={classes.cardContainer}>
+      {searchResult && !searchResult.length ? (
+        <Typography variant="h4" align="center">
+          Chúng tôi không tim thấy kết quả mong muốn!!
+        </Typography>
+      ) : (
+        ""
+      )}
       <Masonry
+        columnClassName=""
         breakpointCols={breakpointColumnsObj}
-        className={classes.cardColumn} // default ''
-        disableImagesLoaded={false} // default false
-        updateOnEachImageLoad={false} // default false and works only if disableImagesLoaded is false
+        className={classes.cardColumn}
+        disableImagesLoaded={false}
+        updateOnEachImageLoad={false}
       >
-        {posts}
+        {photo}
       </Masonry>
     </Grid>
   );

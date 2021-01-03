@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import Input from "../../customField/Input";
-import { forgotPassword } from "../../action/auth/Auth";
+import { forgotPassword } from "../../action/Auth";
 import {
   Button,
   Grid,

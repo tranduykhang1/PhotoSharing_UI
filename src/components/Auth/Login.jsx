@@ -1,9 +1,9 @@
-import React, { Component } from "react";
+import React from "react";
 
 import logo from "../assets/img/logo.png";
 import { FastField, Form, Formik } from "formik";
 import Input from "../../customField/Input";
-import { googleLogin, login } from "../../action/auth/Auth";
+import { googleLogin, login } from "../../action/Auth";
 import { GoogleLogin } from "react-google-login";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
@@ -12,9 +12,7 @@ import * as yup from "yup";
 
 import style from "../assets/style/auth/auth.js";
 
-import {
-  NotificationManager,
-} from "react-notifications";
+import { NotificationManager } from "react-notifications";
 
 //material UI
 import {
@@ -28,24 +26,23 @@ import {
 } from "@material-ui/core/";
 
 function Login(props) {
-  const history = useHistory();
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
   const data = useSelector((state) => state.auth.data);
 
   useEffect(() => {
-    document.title="Đăng nhập"
+    document.title = "Đăng nhập";
     if (data) {
       if (data.status === 200 && data.data !== "Password updated") {
         setLoading(false);
         if (data.data === "Wrong password") {
-          NotificationManager.error("Sai mật khẩu!")
+          NotificationManager.error("Sai mật khẩu!");
         } else if (data.data === "Wrong username") {
-          NotificationManager.error("Không tìm thấy tên đăng nhập")
+          NotificationManager.error("Không tìm thấy tên đăng nhập");
         } else {
           localStorage.setItem("token", data.data);
-          history.push("/");
+          window.location.pathname = '/'
         }
       }
     }
@@ -156,7 +153,7 @@ function Login(props) {
                     </Grid>
                     <Grid item>
                       <Typography margin="normal" color="primary">
-                        Bạn chưa có tài khoản?
+                        {/* Bạn chưa có tài khoản? */}
                         <Link to="/register" className={classes.link}>
                           {" "}
                           Đăng kí ngay

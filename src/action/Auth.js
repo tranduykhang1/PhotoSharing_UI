@@ -34,7 +34,7 @@ export const register = value => {
     return dispatch => {
         axios
             .post("http://localhost:9999/register", {
-                full_name: value.first_name,
+                first_name: value.first_name,
                 last_name: value.last_name,
                 email: value.email,
                 password: value.password,

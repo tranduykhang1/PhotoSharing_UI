@@ -10,9 +10,11 @@ import UpdatePassword from "./components/Auth/UpdatePassword";
 import PhotoDetail from "./components/Photo/PhotoDetail";
 
 
-
 import Home from "./components/Page/Home";
 import User from "./components/Page/User";
+import Album from "./components/Page/Album"
+
+import UpdateProfile from "./components/Page/UpdateProfile";
 
 
 const routes = [{
@@ -43,14 +45,29 @@ const routes = [{
         main: () => < ForgotPassword / >
     },
     {
-        path: '/photo',
+        path: '/photo/:id',
         exec: false,
         main: () => < PhotoDetail / >
     },
     {
-        path: '/user',
+        path: '/user/:id',
         exec: false,
         main: () => < User / >
+    },
+    {
+        path: '/album/:id',
+        exec: false,
+        main: () => < Album / >
+    },
+    {
+        path: '/profile/update',
+        exec: false,
+        main: () => < UpdateProfile / >
+    },
+    {
+        path: '/following',
+        exact: true,
+        main: () => < Home / >
     },
 ]
 

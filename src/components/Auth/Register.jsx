@@ -2,7 +2,7 @@ import React from "react";
 import "../assets/style/auth/auth.css";
 import logo from "../assets/img/logo.png";
 
-import { register } from "../../action/auth/Auth";
+import { register } from "../../action/Auth";
 import Input from "../../customField/Input";
 import { FastField, Form, Formik } from "formik";
 import { Link, useHistory } from "react-router-dom";

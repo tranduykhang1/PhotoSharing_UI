@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Input from "../../customField/Input";
-import { updatePassword } from "../../action/auth/Auth";
+import { updatePassword } from "../../action/Auth";
 import * as yup from "yup";
 import {
   Button,
